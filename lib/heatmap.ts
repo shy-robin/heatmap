@@ -282,7 +282,8 @@ export class Heatmap {
     let startY = this.renderBoundaries[1];
     const boundaryWidth = this.renderBoundaries[2] - startX;
     const boundaryHeight = this.renderBoundaries[3] - startY;
-    let imgWidth, imgHeight;
+    let imgWidth = 0;
+    let imgHeight = 0;
 
     const outOfContainer =
       startX <= -boundaryWidth ||
@@ -325,7 +326,6 @@ export class Heatmap {
       const offset = alpha * 4;
 
       let finalAlpha = 0;
-      const useGradientOpacity = false;
       if (this.alpha < 0) {
         // 默认
         finalAlpha = Math.min(this.maxAlpha, Math.max(this.minAlpha, alpha));
@@ -351,5 +351,20 @@ export class Heatmap {
     this.organizeData(points);
     this.drawAlpha();
     this.colorize();
+  }
+
+  getValueAt(point: { x: number; y: number }) {
+    if (!this.shadowCtx) {
+      return 0;
+    }
+
+    const { x, y } = point;
+    const img = this.shadowCtx.getImageData(x, y, 1, 1);
+    const alpha = img.data[3];
+    const ratio = alpha / 255;
+
+    const value = Math.floor(Math.abs(this.maxValue - this.minValue) * ratio);
+
+    return value;
   }
 }
