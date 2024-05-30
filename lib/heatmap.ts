@@ -7,11 +7,11 @@ export class Heatmap {
   protected radius: number;
   protected gradient: Record<string | number, string>;
   protected blur: number;
-  protected maxOpacity: number;
-  protected minOpacity: number;
+  protected maxAlpha: number;
+  protected minAlpha: number;
   protected maxValue: number;
   protected minValue: number;
-  protected opacity: number;
+  protected alpha: number;
   protected xField: string;
   protected yField: string;
   protected valueField: string;
@@ -41,32 +41,32 @@ export class Heatmap {
       minOpacity = 0,
       maxValue = -1,
       minValue = -1,
-      opacity = 0,
+      opacity = -1,
       xField = "x",
       yField = "y",
       valueField = "value",
     } = config;
 
+    // config error
+    if (minValue > maxValue) {
+      throw new Error("minValue 大于 maxValue");
+    }
+    if (minOpacity > maxOpacity) {
+      throw new Error("minOpacity 大于 maxOpacity");
+    }
+
     this.radius = radius;
     this.gradient = gradient;
     this.blur = blur;
-    this.maxOpacity = maxOpacity;
-    this.minOpacity = minOpacity;
+    this.maxAlpha = maxOpacity * 255;
+    this.minAlpha = minOpacity * 255;
     this.maxValue = maxValue;
     this.minValue = minValue;
-    this.opacity = opacity;
+    this.alpha = opacity * 255;
     this.xField = xField;
     this.yField = yField;
     this.valueField = valueField;
     this.points = [];
-
-    // config error
-    if (this.minValue > this.maxValue) {
-      throw new Error("minValue 大于 maxValue");
-    }
-    if (this.minOpacity > this.maxOpacity) {
-      throw new Error("minOpacity 大于 maxOpacity");
-    }
 
     // init container
     if (typeof container === "string") {
@@ -324,6 +324,15 @@ export class Heatmap {
       const alpha = imgData[i];
       const offset = alpha * 4;
 
+      let finalAlpha = 0;
+      const useGradientOpacity = false;
+      if (this.alpha < 0) {
+        // 默认
+        finalAlpha = Math.min(this.maxAlpha, Math.max(this.minAlpha, alpha));
+      } else {
+        finalAlpha = this.alpha;
+      }
+
       // r
       imgData[i - 3] = this.palette[offset];
       // g
@@ -331,7 +340,7 @@ export class Heatmap {
       // b
       imgData[i - 1] = this.palette[offset + 2];
       // a
-      imgData[i] = this.palette[offset + 3];
+      imgData[i] = finalAlpha;
     }
 
     this.ctx.putImageData(img, startX, startY);
