@@ -23,11 +23,22 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
 
+const container = document.getElementById("heatmap-container");
 const heatmap = new Heatmap({
-  container: document.getElementById("heatmap-container")!,
+  container: container!,
 });
 
 heatmap.setData([
+  {
+    x: 100,
+    y: 100,
+    value: 1120,
+  },
+  {
+    x: 100,
+    y: 100,
+    value: 120,
+  },
   {
     x: 100,
     y: 100,
@@ -59,3 +70,10 @@ heatmap.setData([
     value: 110,
   },
 ]);
+
+container?.addEventListener("mousemove", (e) => {
+  const x = e.clientX - container.offsetLeft;
+  const y = e.clientY - container.offsetTop;
+  console.log("value", heatmap.getValueAt({ x, y }));
+  console.log("dynamic", heatmap.getDynamicValueAt({ x, y }));
+});

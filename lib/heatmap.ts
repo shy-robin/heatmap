@@ -353,7 +353,7 @@ export class Heatmap {
     this.colorize();
   }
 
-  getValueAt(point: { x: number; y: number }) {
+  getDynamicValueAt(point: { x: number; y: number }) {
     if (!this.shadowCtx) {
       return 0;
     }
@@ -366,5 +366,25 @@ export class Heatmap {
     const value = Math.floor(Math.abs(this.maxValue - this.minValue) * ratio);
 
     return value;
+  }
+
+  getValueAt(point: { x: number; y: number }) {
+    const { x, y } = point;
+
+    return this.points.reduce((p, c) => {
+      const { x: circleX, y: circleY, value } = c;
+
+      const x2 = Math.pow(x - circleX, 2);
+      const y2 = Math.pow(y - circleY, 2);
+      const r2 = Math.pow(this.radius, 2);
+
+      if (x2 + y2 < r2) {
+        const ratio = 1 - Math.sqrt(x2 + y2) / this.radius;
+        const val = Math.round(ratio * value);
+        p += val;
+      }
+
+      return p;
+    }, 0);
   }
 }
