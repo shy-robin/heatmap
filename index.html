@@ -8,15 +8,30 @@
   </head>
   <body>
     <div id="app"></div>
-    <div id="heatmap-container"></div>
+    <div id="heatmap-container">
+      <div class="tooltip"></div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
     <style>
+      :root {
+        --tooltip-x: 0px;
+        --tooltip-y: 0px;
+      }
       #heatmap-container {
         position: absolute;
         left: 0;
         right: 0;
         top: 0;
         bottom: 0;
+      }
+      .tooltip {
+        width: 200px;
+        height: 100px;
+        background-color: black;
+        color: #fff;
+        border-radius: 10px;
+        /* position: absolute; */
+        transform: translate(var(--tooltip-x), var(--tooltip-y));
       }
     </style>
   </body>

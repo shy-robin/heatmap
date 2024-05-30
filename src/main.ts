@@ -23,6 +23,12 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
 
+// TODO:
+// 1. tooltip 位置及优化动画
+// 2. 动态筛选热力范围
+// 3. 冻结弹窗
+// 4. 滚动页面
+// 5. 保存热力图
 const container = document.getElementById("heatmap-container");
 const heatmap = new Heatmap({
   container: container!,
@@ -74,6 +80,19 @@ heatmap.setData([
 container?.addEventListener("mousemove", (e) => {
   const x = e.clientX - container.offsetLeft;
   const y = e.clientY - container.offsetTop;
-  console.log("value", heatmap.getValueAt({ x, y }));
-  console.log("dynamic", heatmap.getDynamicValueAt({ x, y }));
+
+  const value = heatmap.getValueAt({ x, y });
+  const dynamicValue = heatmap.getDynamicValueAt({ x, y });
+
+  const tooltip = document.querySelector(".tooltip");
+  tooltip.style.setProperty("--tooltip-x", x + "px");
+  tooltip.style.setProperty("--tooltip-y", y + "px");
+
+  tooltip.innerHTML = `
+<p>value: ${value}</p>
+<p>dynamic value: ${dynamicValue}</p>
+`;
+
+  // tooltip.style.left = x + "px";
+  // tooltip.style.top = y + "px";
 });
