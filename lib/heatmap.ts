@@ -46,7 +46,7 @@ export class Heatmap {
       xField = "x",
       yField = "y",
       valueField = "value",
-      handleExtremaChange = () => {},
+      handleExtremaChange = () => undefined,
     } = config;
 
     // config error
@@ -379,17 +379,50 @@ export class Heatmap {
   getValueAt(point: { x: number; y: number }) {
     const { x, y } = point;
 
-    return this.points.reduce((p, c) => {
-      const { x: circleX, y: circleY, value } = c;
+    let minDistance = Infinity;
+    let minDistancePoints: HeatmapPoint[] = [];
+
+    return this.points.reduce((p, c, i, a) => {
+      const { x: circleX, y: circleY } = c;
 
       const x2 = Math.pow(x - circleX, 2);
       const y2 = Math.pow(y - circleY, 2);
-      const r2 = Math.pow(this.radius, 2);
+      const distance = Math.sqrt(x2 + y2);
 
-      if (x2 + y2 < r2) {
-        const ratio = 1 - Math.sqrt(x2 + y2) / this.radius;
+      // 命中热力点范围内
+      if (distance < this.radius) {
+        if (distance < minDistance) {
+          minDistancePoints = [c];
+          minDistance = distance;
+        } else if (distance === minDistance) {
+          minDistancePoints.push(c);
+        }
+      }
+
+      if (i !== a.length - 1) {
+        return p;
+      }
+
+      // 如果找到距离为 0 的热力点，则将它们的值累加处理
+      if (minDistance === 0) {
+        return minDistancePoints.reduce((p, c) => {
+          const { value } = c;
+          p += value;
+          return p;
+        }, 0);
+      }
+
+      // 如果找到距离非 0 的热力点，则取值最大的值做距离衰减处理
+      if (minDistancePoints.length) {
+        minDistancePoints.sort((a, b) => b.value - a.value);
+        const { x: px, y: py, value } = minDistancePoints[0];
+        const x2 = Math.pow(x - px, 2);
+        const y2 = Math.pow(y - py, 2);
+        const distance = Math.sqrt(x2 + y2);
+        const ratio = 1 - distance / this.radius;
         const val = Math.round(ratio * value);
-        p += val;
+
+        return val;
       }
 
       return p;
