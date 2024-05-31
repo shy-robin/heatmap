@@ -1,4 +1,4 @@
-import { HeatmapConfig, HeatmapPoint } from "./types";
+import { HeatmapConfig, HeatmapPoint, ExtremaData } from "./types";
 
 export class Heatmap {
   protected container: HTMLElement;
@@ -23,6 +23,7 @@ export class Heatmap {
   protected palette: Uint8ClampedArray;
   protected pointTemplate: HTMLCanvasElement;
   protected points: HeatmapPoint[];
+  protected handleExtremaChange: (data: ExtremaData) => void;
 
   constructor(config: HeatmapConfig) {
     const {
@@ -45,6 +46,7 @@ export class Heatmap {
       xField = "x",
       yField = "y",
       valueField = "value",
+      handleExtremaChange = () => {},
     } = config;
 
     // config error
@@ -67,6 +69,7 @@ export class Heatmap {
     this.yField = yField;
     this.valueField = valueField;
     this.points = [];
+    this.handleExtremaChange = handleExtremaChange;
 
     // init container
     if (typeof container === "string") {
@@ -349,6 +352,11 @@ export class Heatmap {
 
   setData(points: Record<string, number>[]) {
     this.organizeData(points);
+    this.handleExtremaChange({
+      min: this.minValue,
+      max: this.maxValue,
+      gradient: this.gradient,
+    });
     this.drawAlpha();
     this.colorize();
   }

@@ -13,10 +13,17 @@ export interface HeatmapConfig {
   xField?: string;
   yField?: string;
   valueField?: string;
+  handleExtremaChange?: (data: ExtremaData) => void;
 }
 
 export interface HeatmapPoint {
   x: number;
   y: number;
   value: number;
+}
+
+export interface ExtremaData {
+  min: number;
+  max: number;
+  gradient: Record<string | number, string>;
 }
